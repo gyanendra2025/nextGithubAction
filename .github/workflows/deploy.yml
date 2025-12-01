@@ -1,0 +1,33 @@
+name: deploy-to-docker-hub
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.14.x, 22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build Docker image
+        run: docker build -t sloth121/next-js-app:latest .
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.docker_password }}" | docker login -u "${{ secrets.docker_username }}" --password-stdin
+
+      - name: Push Docker image
+        run: docker push sloth121/next-js-app:latest
+
+
+
